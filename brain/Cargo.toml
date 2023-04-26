@@ -1,0 +1,36 @@
+[package]
+name = "brain"
+version = "0.1.0"
+edition = "2021"
+license = "AGPL-3.0"
+authors = ["Niklas Pfister <git@omikron.dev>"]
+repository = "https://github.com/myOmikron/home-automation"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+# Webserver
+actix-web = { version = "~4" }
+actix-toolbox = { version = "~0.11", features = ["ws", "logging", "session"] }
+
+# Logging facade
+log = { version = "~0.4" }
+
+# Cli parser
+clap = { version = "~4", features = ["derive"] }
+
+# Async runtime
+tokio = { version = ">=1.23.1", features = ["macros", "rt-multi-thread"] }
+
+# Serialization library
+serde = { version = "~1", features = ["derive"] }
+toml = { version = "~0.7" }
+
+# ORM
+rorm = { version = "~0.5", features = ["uuid", "cli", "tokio-rustls"] }
+
+# HTTP client
+reqwest = { version = "~0.11", features = ["rustls-native-certs"] }
+
+[features]
+rorm-main = []

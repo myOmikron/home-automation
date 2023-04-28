@@ -5,11 +5,15 @@
 
 use actix_toolbox::logging::setup_logging;
 use clap::{Parser, Subcommand};
-use rorm::{cli, DatabaseDriver};
+use log::error;
+use rorm::{cli, Database, DatabaseConfiguration, DatabaseDriver};
 
 use crate::config::Config;
+use crate::server::start_server;
 
 pub mod config;
+pub mod handler;
+mod server;
 
 /// The subcommands
 #[derive(Subcommand)]
@@ -42,6 +46,12 @@ async fn main() -> Result<(), String> {
         Command::Start => {
             let conf = Config::try_from(cli.config_path.as_str())?;
             setup_logging(&conf.logging)?;
+            let db = get_db(&conf)
+                .await
+                .map_err(|e| format!("Error connection to db: {e}"))?;
+            if let Err(err) = start_server(&conf, db).await {
+                error!("Error starting server: {err}");
+            }
         }
         Command::Migrate { migration_dir } => {
             let conf = Config::try_from(cli.config_path.as_str())?;
@@ -66,4 +76,15 @@ async fn main() -> Result<(), String> {
     }
 
     Ok(())
+}
+
+async fn get_db(conf: &Config) -> Result<Database, rorm::Error> {
+    Database::connect(DatabaseConfiguration::new(DatabaseDriver::Postgres {
+        name: conf.database.name.clone(),
+        host: conf.database.host.clone(),
+        port: conf.database.port,
+        user: conf.database.user.clone(),
+        password: conf.database.password.clone(),
+    }))
+    .await
 }

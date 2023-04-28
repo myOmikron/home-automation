@@ -15,6 +15,8 @@ pub struct ServerConfig {
     pub listen_address: IpAddr,
     /// The listen port of the server
     pub listen_port: u16,
+    /// Path of the built frontend
+    pub frontend_path: String,
 }
 
 /// The database config of the brain
@@ -41,6 +43,8 @@ pub struct Config {
     pub logging: LoggingConfig,
     /// The database config
     pub database: DatabaseConfig,
+    /// The server config
+    pub server: ServerConfig,
 }
 
 impl TryFrom<&str> for Config {

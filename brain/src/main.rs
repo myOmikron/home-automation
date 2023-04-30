@@ -2,8 +2,12 @@
 //!
 //! The brain of the home automation
 #![warn(missing_docs)]
+#![cfg_attr(feature = "rorm-main", allow(dead_code, unused_imports))]
 
 use actix_toolbox::logging::setup_logging;
+use actix_web::cookie::Key;
+use base64::prelude::BASE64_STANDARD;
+use base64::Engine;
 use clap::{Parser, Subcommand};
 use log::error;
 use rorm::{cli, Database, DatabaseConfiguration, DatabaseDriver};
@@ -13,13 +17,18 @@ use crate::server::start_server;
 
 pub mod config;
 pub mod handler;
+pub(crate) mod middleware;
+pub mod models;
 mod server;
+pub mod swagger;
 
 /// The subcommands
 #[derive(Subcommand)]
 pub enum Command {
     /// Start the server
     Start,
+    /// Generate a SecretKey
+    Keygen,
     /// Apply migrations to the database
     Migrate {
         /// The directory where the migrations are
@@ -38,6 +47,7 @@ pub struct Cli {
     command: Command,
 }
 
+#[rorm::rorm_main]
 #[tokio::main]
 async fn main() -> Result<(), String> {
     let cli = Cli::parse();
@@ -52,6 +62,9 @@ async fn main() -> Result<(), String> {
             if let Err(err) = start_server(&conf, db).await {
                 error!("Error starting server: {err}");
             }
+        }
+        Command::Keygen => {
+            println!("{}", BASE64_STANDARD.encode(Key::generate().master()));
         }
         Command::Migrate { migration_dir } => {
             let conf = Config::try_from(cli.config_path.as_str())?;

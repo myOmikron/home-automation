@@ -1,3 +1,9 @@
-/target
+# IDE
 .idea/
+
+# Rust
+/target
+
+# Project
+.models.json
 config.toml

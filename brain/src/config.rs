@@ -15,6 +15,8 @@ pub struct ServerConfig {
     pub listen_address: IpAddr,
     /// The listen port of the server
     pub listen_port: u16,
+    ///
+    pub secret_key: String,
     /// Path of the built frontend
     pub frontend_path: String,
 }

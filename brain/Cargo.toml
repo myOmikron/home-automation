@@ -14,6 +14,16 @@ actix-web = { version = "~4" }
 actix-toolbox = { version = "~0.11", features = ["ws", "logging", "session"] }
 actix-files = { version = "~0.6" }
 
+# openapi swagger
+utoipa = { version = "~3", features = ["actix_extras", "repr", "chrono", "uuid", "openapi_extensions", "preserve_order"] }
+# openapi swagger boilerplat generation
+utoipa-swagger-ui = { version = "3", features = ["actix-web"] }
+
+# Hashing
+argon2 = { version = "~0.5" }
+# RNG utils
+rand = { version = "~0.8" }
+
 # Logging facade
 log = { version = "~0.4" }
 
@@ -22,10 +32,19 @@ clap = { version = "~4", features = ["derive"] }
 
 # Async runtime
 tokio = { version = ">=1.23.1", features = ["macros", "rt-multi-thread"] }
+futures = { version = "~0.3" }
 
 # Serialization library
 serde = { version = "~1", features = ["derive"] }
+serde_repr = { version = "~0.1" }
+serde_json = { version = "~1" }
 toml = { version = "~0.7" }
+# UUID generation
+uuid = { version = "~1", features = ["v4", "serde"] }
+# Time library
+chrono = { version = ">=0.4.20", default-features = false, features = ["serde"] }
+# Base64 library
+base64 = { version = "~0.21" }
 
 # ORM
 rorm = { version = "~0.5", features = ["uuid", "cli", "tokio-rustls"] }

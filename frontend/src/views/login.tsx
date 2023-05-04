@@ -1,26 +1,43 @@
 import React from "react";
 import Input from "../components/input.tsx";
+import { Api } from "../api/api.ts";
+import { toast } from "react-toastify";
+import { okOrToast } from "../utils/helper";
 
-type LoginProps = {};
+type LoginProps = {
+    onLogin(): void;
+};
 type LoginState = {
     username: string;
     password: string;
 };
 
 export default class Login extends React.Component<LoginProps, LoginState> {
-    constructor(props: LoginProps) {
-        super(props);
+    state: LoginState = {
+        username: "",
+        password: "",
+    };
 
-        this.state = {
-            username: "",
-            password: "",
-        };
+    performLogin() {
+        Api.auth.login(this.state.username, this.state.password).then(
+            okOrToast(() => {
+                toast.success("Authenticated successfully");
+                this.props.onLogin();
+            })
+        );
     }
 
     render() {
         return (
             <div className={"login-container"}>
-                <div className={"login"}>
+                <form
+                    method={"post"}
+                    className={"login"}
+                    onSubmit={(e) => {
+                        e.preventDefault();
+                        this.performLogin();
+                    }}
+                >
                     <Input
                         value={this.state.username}
                         onChange={(v: string) => {
@@ -34,7 +51,7 @@ export default class Login extends React.Component<LoginProps, LoginState> {
                         }}
                         type={"password"}
                     />
-                </div>
+                </form>
             </div>
         );
     }

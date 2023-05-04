@@ -1,8 +1,9 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
 import "./index.css";
-import Login from "./views/login.tsx";
 import { ROUTER } from "./routes.tsx";
+import { ToastContainer } from "react-toastify";
+import { UserProvider } from "./context/user.tsx";
 
 type RouterProps = {};
 type RouterState = {
@@ -10,13 +11,9 @@ type RouterState = {
 };
 
 class Router extends React.Component<RouterProps, RouterState> {
-    constructor(props: RouterProps) {
-        super(props);
-
-        this.state = {
-            path: [],
-        };
-    }
+    state: RouterState = {
+        path: [],
+    };
 
     componentDidMount() {
         // Update state to match url
@@ -47,18 +44,19 @@ class Router extends React.Component<RouterProps, RouterState> {
     }
 
     render() {
-        const { path } = this.state;
-
-        if (path[0] && path[0] === "login") {
-            return <Login />;
-        }
-
-        return <div className="content-container">{ROUTER.matchAndRender(path) || <div>Unknown route</div>}</div>;
+        return (
+            <UserProvider>
+                <div className="content-container">
+                    {ROUTER.matchAndRender(this.state.path) || <div>Unknown route</div>}
+                </div>
+            </UserProvider>
+        );
     }
 }
 
 ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
     <>
         <Router />
+        <ToastContainer autoClose={3500} theme={"dark"} />
     </>
 );

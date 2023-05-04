@@ -23,12 +23,15 @@ impl Modify for CookieSecurity {
 #[openapi(
     paths(
         handler::login,
-        handler::logout
+        handler::logout,
+        handler::test,
+        handler::get_me,
     ),
     components(schemas(
         handler::ApiStatusCode,
         handler::ApiErrorResponse,
-        handler::LoginRequest
+        handler::LoginRequest,
+        handler::GetMeResponse,
     )),
     modifiers(&CookieSecurity)
 )]

@@ -9,7 +9,7 @@ use serde::Deserialize;
 use utoipa::ToSchema;
 
 use crate::handler::{ApiError, ApiResult};
-use crate::models::Account;
+use crate::models::User;
 
 /// The request data of a login request
 #[derive(ToSchema, Deserialize)]
@@ -34,15 +34,15 @@ pub struct LoginRequest {
     request_body = LoginRequest,
 )]
 #[post("/login")]
-pub(crate) async fn login(
+pub async fn login(
     req: Json<LoginRequest>,
     db: Data<Database>,
     session: Session,
 ) -> ApiResult<HttpResponse> {
     let mut tx = db.start_transaction().await?;
 
-    let user = query!(&mut tx, Account)
-        .condition(Account::F.username.equals(&req.username))
+    let user = query!(&mut tx, User)
+        .condition(User::F.username.equals(&req.username))
         .optional()
         .await?
         .ok_or(ApiError::LoginFailed)?;
@@ -57,9 +57,9 @@ pub(crate) async fn login(
             _ => ApiError::InvalidHash(e),
         })?;
 
-    update!(&mut tx, Account)
-        .condition(Account::F.uuid.equals(user.uuid.as_ref()))
-        .set(Account::F.last_login, Some(Utc::now().naive_utc()))
+    update!(&mut tx, User)
+        .condition(User::F.uuid.equals(user.uuid.as_ref()))
+        .set(User::F.last_login, Some(Utc::now().naive_utc()))
         .exec()
         .await?;
 
@@ -84,7 +84,23 @@ pub(crate) async fn login(
     ),
 )]
 #[get("/logout")]
-pub(crate) async fn logout(session: Session) -> ApiResult<HttpResponse> {
+pub async fn logout(session: Session) -> ApiResult<HttpResponse> {
     session.purge();
+    Ok(HttpResponse::Ok().finish())
+}
+
+/// Test the authentication state of the user
+#[utoipa::path(
+    tag = "Authentication",
+    context_path = "/api/v1",
+    responses(
+        (status = 200, description = "Logout successful"),
+        (status = 400, description = "Client error", body = ApiErrorResponse),
+        (status = 500, description = "Server error", body = ApiErrorResponse)
+    ),
+    security(("session_token" = []))
+)]
+#[get("/test")]
+pub async fn test() -> ApiResult<HttpResponse> {
     Ok(HttpResponse::Ok().finish())
 }

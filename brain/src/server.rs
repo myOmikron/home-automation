@@ -55,10 +55,15 @@ pub async fn start_server(conf: &Config, db: Database) -> Result<(), String> {
             )
             .wrap(ErrorHandlers::new().handler(StatusCode::NOT_FOUND, handle_not_found))
             .wrap(setup_logging_mw(LoggingMiddlewareConfig::default()))
-            .service(Files::new("/", &frontend_path).index_file("index.html"))
             .service(SwaggerUi::new("/docs/{_:.*}").url("/api-doc/openapi.json", ApiDoc::openapi()))
             .service(scope("/api/v1/auth").service(login).service(logout))
-            .service(scope("/api/v1").wrap(AuthenticationRequired))
+            .service(
+                scope("/api/v1")
+                    .wrap(AuthenticationRequired)
+                    .service(test)
+                    .service(get_me),
+            )
+            .service(Files::new("/", &frontend_path).index_file("index.html"))
     })
     .bind(socket_addr)
     .map_err(|e| format!("Could not bind to {socket_addr}: {e}"))?

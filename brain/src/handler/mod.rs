@@ -12,8 +12,10 @@ use utoipa::{IntoParams, ToSchema};
 use uuid::Uuid;
 
 pub use crate::handler::auth::*;
+pub use crate::handler::users::*;
 
 mod auth;
+mod users;
 
 /// The uuid in a path
 #[derive(Deserialize, IntoParams)]

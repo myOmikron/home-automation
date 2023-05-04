@@ -4,7 +4,7 @@ use uuid::Uuid;
 
 /// The database model of an account
 #[derive(Model)]
-pub struct Account {
+pub struct User {
     /// The primary key of an account
     #[rorm(primary_key)]
     pub uuid: Uuid,
@@ -26,8 +26,8 @@ pub struct Account {
 }
 
 #[derive(Patch)]
-#[rorm(model = "Account")]
-pub(crate) struct AccountInsert {
+#[rorm(model = "User")]
+pub(crate) struct UserInsert {
     pub(crate) uuid: Uuid,
     pub(crate) username: String,
     pub(crate) display_name: String,

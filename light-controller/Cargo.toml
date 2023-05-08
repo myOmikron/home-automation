@@ -1,0 +1,16 @@
+[package]
+name = "light-controller"
+version = "0.1.0"
+authors = ["myOmikron <git@omikron.dev>"]
+edition = "2021"
+
+[features]
+pio = ["esp-idf-sys/pio"]
+
+[dependencies]
+esp-idf-sys = { version = "~0.32", features = ["binstart"] }
+esp-idf-hal = { version = "~0.40" }
+esp-idf-svc = { version = "~0.45", features = ["experimental", "alloc"] }
+
+[build-dependencies]
+embuild = "~0.31"

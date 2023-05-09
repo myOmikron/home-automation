@@ -1,9 +1,12 @@
 # IDE
 .idea/
+.vagrant/
+.embuild/
 
 # Rust
-/target
+target/
 
 # Project
 .models.json
 config.toml
+vagrant/vars.yml

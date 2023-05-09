@@ -1,0 +1,5 @@
+---
+- brain_db_name: "brain"
+  brain_db_user: "brain"
+  brain_db_password: "super-secure-password"
+  brain_secret_key: ""

@@ -1,0 +1,25 @@
+[Server]
+ListenAddress = "127.0.0.1"
+ListenPort = 8080
+SecretKey = "{{ brain_secret_key }}"
+
+[Database]
+Host = "127.0.0.1"
+Port = 5432
+Name = "{{ brain_db_name }}"
+User = "{{ brain_db_user }}"
+Password = "{{ brain_db_password }}"
+
+[Logging]
+LogLevel = "info"
+Path = "/var/log/brain/main.log"
+RotationFileSize = "10 MB"
+MaxRotationCount = 10
+
+[[Logging.AdditionalFileLoggers]]
+Name = "requests"
+AddToMainLogger = true
+Path = "/var/log/brain/requests.log"
+RotationFileSize = "10 MB"
+MaxRotationCount = 5
+AlternativePattern = "{h([{d(%Y-%m-%d %H:%M:%S)} | {({l}):5.5}])} {m}{n}"

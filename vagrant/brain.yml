@@ -1,0 +1,229 @@
+---
+- name: Deploy brain
+  hosts: brain
+  vars:
+    - ansible_become: yes
+  vars_files:
+    - vars.yml
+  tasks:
+    - name: Install dependencies
+      apt:
+        state: latest
+        update_cache: yes
+        name:
+          - mosquitto
+          - nginx
+          - postgresql
+          - gnupg2
+          - libssl-dev
+          # Required for ansible
+          - acl
+          - python3-psycopg2
+
+    - name: Install key
+      ansible.builtin.apt_key:
+        state: present
+        url: "https://deb.nodesource.com/gpgkey/nodesource.gpg.key"
+    - name: node repository
+      ansible.builtin.apt_repository:
+        repo: "deb https://deb.nodesource.com/node_18.x bullseye main"
+    - name: Install node
+      ansible.builtin.apt:
+        state: latest
+        name: nodejs
+    - name: Install yarn
+      ansible.builtin.command:
+        cmd: "npm install -g yarn"
+
+    - name: Check for rustup
+      ansible.builtin.stat:
+        path: "/tmp/rustup.sh"
+      register: rustup_file
+    - name: Download rustup
+      become_user: vagrant
+      ansible.builtin.shell:
+        cmd: "curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs > /tmp/rustup.sh"
+      when: not rustup_file.stat.exists
+    - name: Execute installer
+      become_user: vagrant
+      ansible.builtin.shell:
+        cmd: "sh /tmp/rustup.sh -y"
+      when: not rustup_file.stat.exists
+
+    - name: Start postgres
+      ansible.builtin.systemd:
+        name: postgresql
+        state: started
+    - name: Create brain db user
+      become_user: postgres
+      community.postgresql.postgresql_user:
+        name: "{{ brain_db_user }}"
+        password: "{{ brain_db_password }}"
+    - name: Create brain database
+      become_user: postgres
+      community.postgresql.postgresql_db:
+        name: "{{ brain_db_name }}"
+        encoding: UTF-8
+        owner: "{{ brain_db_user }}"
+
+    - name: Create group certs
+      group:
+        name: certs
+        state: present
+    - name: Create group brain
+      group:
+        name: brain
+        state: present
+    - name: Create brain user
+      user:
+        name: brain
+        group: brain
+        create_home: yes
+        groups:
+          - brain
+          - certs
+        state: present
+        system: yes
+    - name: Add mosquitto to certs group
+      user:
+        name: mosquitto
+        groups:
+          - mosquitto
+          - certs
+    - name: Add www-data to certs group
+      user:
+        name: www-data
+        groups:
+          - www-data
+          - certs
+
+    - name: Create etc certs
+      file:
+        path: /etc/certs
+        state: directory
+        owner: root
+        group: certs
+        mode: 0750
+    - name: Copy ca.crt
+      copy:
+        src: brain/ca.crt
+        dest: /etc/certs/ca.crt
+        owner: root
+        group: certs
+        mode: 0640
+    - name: Copy server.key
+      copy:
+        src: brain/server.key
+        dest: /etc/certs/server.key
+        owner: root
+        group: certs
+        mode: 0640
+    - name: Copy server.crt
+      copy:
+        src: brain/server.crt
+        dest: /etc/certs/server.crt
+        owner: root
+        group: certs
+        mode: 0640
+
+    - name: Create /etc/brain
+      ansible.builtin.file:
+        name: /etc/brain
+        state: directory
+        mode: 0750
+        owner: root
+        group: brain
+    - name: Apply brain config.toml
+      template:
+        src: brain/config.toml.jinja2
+        dest: /etc/brain/config.toml
+        owner: root
+        group: brain
+        mode: 0640
+
+    - name: Compile brain
+      become_user: vagrant
+      ansible.builtin.command:
+        chdir: /vagrant
+        cmd: "/home/vagrant/.cargo/bin/cargo build -r -p brain"
+    - name: Copy to /usr/local/bin
+      copy:
+        remote_src: yes
+        src: /vagrant/target/release/brain
+        dest: /usr/local/bin/brain
+        mode: 0755
+        owner: root
+
+    - name: Stop brain.service
+      systemd:
+        name: brain.service
+        state: stopped
+      ignore_errors: yes
+    - name: Apply migrations
+      command:
+        chdir: /vagrant/brain
+        cmd: /usr/local/bin/brain migrate migrations/
+
+    - name: Install systemd service
+      copy:
+        src: brain/brain.service
+        dest: /etc/systemd/system/brain.service
+        owner: root
+    - name: Restart brain
+      systemd:
+        enabled: yes
+        name: brain.service
+        state: restarted
+
+    - name: Install packages
+      become_user: vagrant
+      ansible.builtin.command:
+        chdir: /vagrant/frontend
+        cmd: "yarn install"
+    - name: Build frontend
+      become_user: vagrant
+      ansible.builtin.command:
+        chdir: /vagrant/frontend
+        cmd: "yarn build"
+    - name: Copy frontend to static dir
+      ansible.builtin.copy:
+        remote_src: yes
+        src: /vagrant/frontend/dist/
+        dest: /var/www/brain
+
+    - name: Apply nginx template
+      template:
+        src: brain/brain.nginx.jinja2
+        dest: /etc/nginx/sites-available/brain.conf
+    - name: Link to enabled
+      file:
+        state: link
+        owner: root
+        group: root
+        src: /etc/nginx/sites-available/brain.conf
+        dest: /etc/nginx/sites-enabled/brain.conf
+    - name: Remove default conf
+      file:
+        state: absent
+        path: /etc/nginx/sites-enabled/default
+    - name: Reload nginx
+      systemd:
+        name: nginx
+        state: reloaded
+
+    - name: Restart brain
+      systemd:
+        name: brain.service
+        state: restarted
+
+    - name: Apply mosquitto configuration
+      template:
+        src: brain/listeners.conf
+        dest: /etc/mosquitto/conf.d/listeners.conf
+        mode: 0640
+        owner: root
+        group: mosquitto
+    - name: Restart mosquitto
+      systemd:
+        name: mosquitto
+        state: restarted

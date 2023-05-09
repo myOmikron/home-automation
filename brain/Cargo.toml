@@ -12,7 +12,6 @@ repository = "https://github.com/myOmikron/home-automation"
 # Webserver
 actix-web = { version = "~4" }
 actix-toolbox = { version = "~0.11", features = ["ws", "logging", "session"] }
-actix-files = { version = "~0.6" }
 
 # openapi swagger
 utoipa = { version = "~3", features = ["actix_extras", "repr", "chrono", "uuid", "openapi_extensions", "preserve_order"] }

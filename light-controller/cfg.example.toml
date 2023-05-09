@@ -1,0 +1,7 @@
+[light-controller]
+mqtt_user = ""
+mqtt_pass = ""
+mqtt_host = ""
+mqtt_topic = ""
+wifi_ssid = ""
+wifi_psk = ""

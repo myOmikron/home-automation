@@ -1,5 +1,7 @@
 //! The database models are defined in this module
 
-pub use account::*;
+pub use devices::*;
+pub use user::*;
 
-mod account;
+mod devices;
+mod user;

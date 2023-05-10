@@ -3,7 +3,7 @@
 use utoipa::openapi::security::{ApiKey, ApiKeyValue, SecurityScheme};
 use utoipa::{Modify, OpenApi};
 
-use crate::handler;
+use crate::{handler, models};
 
 struct CookieSecurity;
 
@@ -26,12 +26,16 @@ impl Modify for CookieSecurity {
         handler::logout,
         handler::test,
         handler::get_me,
+        handler::get_devices,
     ),
     components(schemas(
         handler::ApiStatusCode,
         handler::ApiErrorResponse,
         handler::LoginRequest,
         handler::GetMeResponse,
+        models::DeviceType,
+        handler::GetDevicesResponse,
+        handler::DeviceResponse,
     )),
     modifiers(&CookieSecurity)
 )]

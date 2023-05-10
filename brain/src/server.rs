@@ -65,7 +65,8 @@ pub async fn start_server(
                 scope("/api/v1")
                     .wrap(AuthenticationRequired)
                     .service(test)
-                    .service(get_me),
+                    .service(get_me)
+                    .service(get_devices),
             )
     })
     .bind(socket_addr)

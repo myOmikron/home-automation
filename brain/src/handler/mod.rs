@@ -12,9 +12,11 @@ use utoipa::{IntoParams, ToSchema};
 use uuid::Uuid;
 
 pub use crate::handler::auth::*;
+pub use crate::handler::devices::*;
 pub use crate::handler::users::*;
 
 mod auth;
+mod devices;
 mod users;
 
 /// The uuid in a path

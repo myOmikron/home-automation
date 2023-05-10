@@ -57,6 +57,8 @@ fn main() -> Result<()> {
     let mut client = EspMqttClient::new(broker_url, &mqtt_config, |res| {
         if let Ok(Event::Received(msg)) = res {
             println!("res {msg:#?} {}", from_utf8(msg.data()).unwrap());
+        } else if let Err(e) = res {
+            panic!("Mqtt error: {e}");
         }
     })?;
 

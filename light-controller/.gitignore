@@ -2,3 +2,4 @@
 /.embuild
 /target
 cfg.toml
+fullchain.crt

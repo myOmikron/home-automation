@@ -19,7 +19,7 @@ use crate::wifi::connect_wifi;
 mod config;
 mod wifi;
 
-const CERT: &'static str = concat!(include_str!("../../vagrant/brain/fullchain.crt"), "\0");
+const CERT: &'static str = concat!(include_str!("../fullchain.crt"), "\0");
 
 fn main() -> Result<()> {
     // It is necessary to call this function once. Otherwise some patches to the runtime

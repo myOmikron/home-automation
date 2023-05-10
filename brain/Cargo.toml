@@ -33,6 +33,9 @@ clap = { version = "~4", features = ["derive"] }
 tokio = { version = ">=1.23.1", features = ["macros", "rt-multi-thread"] }
 futures = { version = "~0.3" }
 
+# MQTT client
+rumqttc = { version = "~0.21", features = ["use-native-tls"] }
+
 # Serialization library
 serde = { version = "~1", features = ["derive"] }
 serde_repr = { version = "~0.1" }

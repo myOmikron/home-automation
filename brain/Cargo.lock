@@ -549,6 +549,7 @@ dependencies = [
  "rand",
  "reqwest",
  "rorm",
+ "rumqttc",
  "serde",
  "serde_json",
  "serde_repr",
@@ -1080,6 +1081,7 @@ checksum = "1657b4441c3403d9f7b3409e47575237dac27b1b5726df654a6ecbf92f0f7577"
 dependencies = [
  "futures-core",
  "futures-sink",
+ "nanorand",
  "pin-project",
  "spin 0.9.8",
 ]
@@ -1231,8 +1233,10 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "c85e1d9ab2eadba7e5040d4e09cbd6d072b76a557ad64e797c2cb9d4da21d7e4"
 dependencies = [
  "cfg-if",
+ "js-sys",
  "libc",
  "wasi 0.11.0+wasi-snapshot-preview1",
+ "wasm-bindgen",
 ]
 
 [[package]]
@@ -1744,6 +1748,15 @@ dependencies = [
  "log",
  "wasi 0.11.0+wasi-snapshot-preview1",
  "windows-sys 0.45.0",
+]
+
+[[package]]
+name = "nanorand"
+version = "0.7.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "6a51313c5820b0b02bd422f4b44776fbf47961755c74ce64afc73bfad10226c3"
+dependencies = [
+ "getrandom",
 ]
 
 [[package]]
@@ -2404,6 +2417,25 @@ checksum = "034e22c514f5c0cb8a10ff341b9b048b5ceb21591f31c8f44c43b960f9b3524a"
 dependencies = [
  "libc",
  "winapi",
+]
+
+[[package]]
+name = "rumqttc"
+version = "0.21.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "04483567c64bb8a9d64364a0a9437215a056a2b886140fd66e62a12394cf5998"
+dependencies = [
+ "bytes",
+ "flume",
+ "futures",
+ "log",
+ "native-tls",
+ "rustls-native-certs",
+ "rustls-pemfile",
+ "thiserror",
+ "tokio",
+ "tokio-native-tls",
+ "tokio-rustls",
 ]
 
 [[package]]

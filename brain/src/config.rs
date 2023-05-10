@@ -15,10 +15,22 @@ pub struct ServerConfig {
     pub listen_address: IpAddr,
     /// The listen port of the server
     pub listen_port: u16,
-    ///
+    /// Secret key of the server. Used for signing cookies
     pub secret_key: String,
-    /// Path of the built frontend
-    pub frontend_path: String,
+}
+
+/// The mqtt config of the brain
+#[derive(Serialize, Deserialize)]
+#[serde(rename_all = "PascalCase")]
+pub struct MqttConfig {
+    /// Host of the mqtt server
+    pub host: String,
+    /// Port of the mqtt server
+    pub port: u16,
+    /// Username to use for authentication
+    pub username: String,
+    /// Password for the user
+    pub password: String,
 }
 
 /// The database config of the brain
@@ -47,6 +59,8 @@ pub struct Config {
     pub database: DatabaseConfig,
     /// The server config
     pub server: ServerConfig,
+    /// The mqtt config
+    pub mqtt: MqttConfig,
 }
 
 impl TryFrom<&str> for Config {

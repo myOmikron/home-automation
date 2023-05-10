@@ -1,6 +1,5 @@
 use std::net::SocketAddr;
 
-use actix_files::Files;
 use actix_toolbox::tb_middleware::{
     setup_logging_mw, DBSessionStore, LoggingMiddlewareConfig, PersistentSession, SessionMiddleware,
 };
@@ -17,13 +16,18 @@ use rorm::Database;
 use utoipa::OpenApi;
 use utoipa_swagger_ui::SwaggerUi;
 
+use crate::chan::MqttClient;
 use crate::config::Config;
 use crate::handler::*;
 use crate::middleware::{handle_not_found, json_extractor_error, AuthenticationRequired};
 use crate::swagger::ApiDoc;
 
 /// Start the server
-pub async fn start_server(conf: &Config, db: Database) -> Result<(), String> {
+pub async fn start_server(
+    conf: &Config,
+    db: Database,
+    mqtt_client: MqttClient,
+) -> Result<(), String> {
     let socket_addr = SocketAddr::new(conf.server.listen_address, conf.server.listen_port);
 
     if conf.server.secret_key.is_empty() {
@@ -37,12 +41,12 @@ pub async fn start_server(conf: &Config, db: Database) -> Result<(), String> {
 
     info!("Starting to listen on http://{socket_addr}");
 
-    let frontend_path = conf.server.frontend_path.clone();
     HttpServer::new(move || {
         App::new()
             .app_data(PayloadConfig::default())
             .app_data(JsonConfig::default().error_handler(json_extractor_error))
             .app_data(Data::new(db.clone()))
+            .app_data(Data::new(mqtt_client.clone()))
             .wrap(setup_logging_mw(LoggingMiddlewareConfig::default()))
             .wrap(Compress::default())
             .wrap(
@@ -63,7 +67,6 @@ pub async fn start_server(conf: &Config, db: Database) -> Result<(), String> {
                     .service(test)
                     .service(get_me),
             )
-            .service(Files::new("/", &frontend_path).index_file("index.html"))
     })
     .bind(socket_addr)
     .map_err(|e| format!("Could not bind to {socket_addr}: {e}"))?

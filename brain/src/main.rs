@@ -9,12 +9,14 @@ use actix_web::cookie::Key;
 use base64::prelude::BASE64_STANDARD;
 use base64::Engine;
 use clap::{Parser, Subcommand};
-use log::error;
+use log::{error, info};
 use rorm::{cli, Database, DatabaseConfiguration, DatabaseDriver};
 
+use crate::chan::start_mqtt_client;
 use crate::config::Config;
 use crate::server::start_server;
 
+pub mod chan;
 pub mod config;
 pub mod handler;
 pub(crate) mod middleware;
@@ -56,10 +58,27 @@ async fn main() -> Result<(), String> {
         Command::Start => {
             let conf = Config::try_from(cli.config_path.as_str())?;
             setup_logging(&conf.logging)?;
-            let db = get_db(&conf)
-                .await
-                .map_err(|e| format!("Error connection to db: {e}"))?;
-            if let Err(err) = start_server(&conf, db).await {
+
+            let db = match get_db(&conf).await {
+                Ok(db) => db,
+                Err(err) => {
+                    error!("Error initializing db: {err}");
+                    return Err(format!("Error initializing db: {err}"));
+                }
+            };
+
+            info!("Initializing mqtt client");
+            let mqtt_client = match start_mqtt_client(&conf).await {
+                Ok(c) => c,
+                Err(err) => {
+                    error!("Error initializing connection to mqtt broker: {err}");
+                    return Err(format!(
+                        "Error initializing connection to mqtt broker: {err}"
+                    ));
+                }
+            };
+
+            if let Err(err) = start_server(&conf, db, mqtt_client).await {
                 error!("Error starting server: {err}");
             }
         }

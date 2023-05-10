@@ -98,7 +98,7 @@ pub async fn logout(session: Session) -> ApiResult<HttpResponse> {
         (status = 400, description = "Client error", body = ApiErrorResponse),
         (status = 500, description = "Server error", body = ApiErrorResponse)
     ),
-    security(("session_token" = []))
+    security(("session_cookie" = []))
 )]
 #[get("/test")]
 pub async fn test() -> ApiResult<HttpResponse> {

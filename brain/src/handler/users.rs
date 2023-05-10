@@ -28,7 +28,7 @@ pub struct GetMeResponse {
         (status = 400, description = "Client error", body = ApiErrorResponse),
         (status = 500, description = "Server error", body = ApiErrorResponse)
     ),
-    security(("session_token" = []))
+    security(("session_cookie" = []))
 )]
 #[get("/users/me")]
 pub async fn get_me(session: Session, db: Data<Database>) -> ApiResult<Json<GetMeResponse>> {

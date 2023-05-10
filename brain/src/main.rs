@@ -67,7 +67,6 @@ async fn main() -> Result<(), String> {
                 }
             };
 
-            info!("Initializing mqtt client");
             let mqtt_client = match start_mqtt_client(&conf).await {
                 Ok(c) => c,
                 Err(err) => {
@@ -77,6 +76,7 @@ async fn main() -> Result<(), String> {
                     ));
                 }
             };
+            info!("Mqtt client initialized");
 
             if let Err(err) = start_server(&conf, db, mqtt_client).await {
                 error!("Error starting server: {err}");

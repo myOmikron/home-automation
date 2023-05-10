@@ -111,6 +111,16 @@
         owner: root
         group: certs
         mode: 0640
+    - name: Copy ca.crt to ca-certificates
+      copy:
+        src: brain/ca.crt
+        dest: /usr/local/share/ca-certificates/test.crt
+        owner: root
+        group: root
+        mode: 0640
+    - name: Update ca-certificates
+      command:
+        cmd: update-ca-certificates
     - name: Copy server.key
       copy:
         src: brain/server.key
@@ -144,12 +154,12 @@
     - name: Compile brain
       become_user: vagrant
       ansible.builtin.command:
-        chdir: /vagrant
+        chdir: /vagrant/brain/
         cmd: "/home/vagrant/.cargo/bin/cargo build -r -p brain"
     - name: Copy to /usr/local/bin
       copy:
         remote_src: yes
-        src: /vagrant/target/release/brain
+        src: /vagrant/brain/target/release/brain
         dest: /usr/local/bin/brain
         mode: 0755
         owner: root

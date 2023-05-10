@@ -10,6 +10,12 @@ Name = "{{ brain_db_name }}"
 User = "{{ brain_db_user }}"
 Password = "{{ brain_db_password }}"
 
+[Mqtt]
+Host = "127.0.0.1"
+Port = 8883
+Username = "{{ brain_mqtt_username }}"
+Password = "{{ brain_mqtt_password }}"
+
 [Logging]
 LogLevel = "info"
 Path = "/var/log/brain/main.log"

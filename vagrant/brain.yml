@@ -221,11 +221,6 @@
         name: nginx
         state: reloaded
 
-    - name: Restart brain
-      systemd:
-        name: brain.service
-        state: restarted
-
     - name: Apply mosquitto configuration
       template:
         src: brain/listeners.conf
@@ -236,4 +231,9 @@
     - name: Restart mosquitto
       systemd:
         name: mosquitto
+        state: restarted
+
+    - name: Restart brain
+      systemd:
+        name: brain.service
         state: restarted

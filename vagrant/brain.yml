@@ -228,6 +228,13 @@
         mode: 0640
         owner: root
         group: mosquitto
+    - name: Apply pwfile
+      copy:
+        src: brain/pwfile
+        dest: /etc/mosquitto/pwfile
+        mode: 0640
+        owner: root
+        group: mosquitto
     - name: Restart mosquitto
       systemd:
         name: mosquitto
